@@ -13,6 +13,7 @@ export default function InputBarang() {
   // ================= STATE FORM ATAS =================
   const [noSlip, setNoSlip] = useState("");
   const [tipePergerakan, setTipePergerakan] = useState("");
+  const [jenisTransaksi, setJenisTransaksi] = useState("");
   const [noKode, setNoKode] = useState("");
 
   const [showDetail, setShowDetail] = useState(false);
@@ -47,7 +48,7 @@ export default function InputBarang() {
 
         <div className="p-5 md:p-6">
           {/* ================= FORM INPUT ATAS ================= */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500 uppercase">No Slip</label>
               <input
@@ -59,16 +60,27 @@ export default function InputBarang() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase">Tipe Pergerakan</label>
+              <label className="text-xs font-semibold text-slate-500 uppercase">Jenis Transaksi</label>
               <select
                 className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm md:text-base bg-white"
+                value={jenisTransaksi}
+                onChange={(e) => setJenisTransaksi(e.target.value)}
+              >
+                <option value="">Pilih Jenis</option>
+                <option value="Penerimaan">Penerimaan</option>
+                <option value="Pengeluaran">Pengeluaran</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-500 uppercase">Tipe Pergerakan</label>
+              <input
+                type="number"
+                className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm md:text-base"
+                placeholder="Contoh: 101"
                 value={tipePergerakan}
                 onChange={(e) => setTipePergerakan(e.target.value)}
-              >
-                <option value="">Pilih Tipe Pergerakan</option>
-                <option value="Masuk">Masuk</option>
-                <option value="Keluar">Keluar</option>
-              </select>
+              />
             </div>
 
             <div className="space-y-1">
@@ -86,8 +98,8 @@ export default function InputBarang() {
             <button
               onClick={async () => {
                 // Validasi sederhana
-                if (!noSlip || !tipePergerakan || !noKode) {
-                  alert("Mohon lengkapi semua data header (No Slip, Tipe Pergerakan, Valuation Type)");
+                if (!noSlip || !tipePergerakan || !jenisTransaksi || !noKode) {
+                  alert("Mohon lengkapi semua data header (No Slip, Jenis Transaksi, Tipe Pergerakan, Valuation Type)");
                   return;
                 }
 
@@ -108,6 +120,7 @@ export default function InputBarang() {
                     body: JSON.stringify({
                       noSlip,
                       tipePergerakan,
+                      jenisTransaksi,
                       valuationType: noKode,
                       petugas: petugasId
                     })
