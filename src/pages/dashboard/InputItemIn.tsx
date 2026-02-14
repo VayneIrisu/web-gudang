@@ -3,7 +3,7 @@ import { useState } from "react";
 type Item = {
   noMaterial: string;
   namaMaterial: string;
-  valuationType: string;
+  nomerKode7: string;
   satuan: string;
   jumlah: number;
   hargaSatuan: number;
@@ -17,6 +17,7 @@ export default function InputBarang() {
   const [noKode, setNoKode] = useState("");
 
   const [showDetail, setShowDetail] = useState(false);
+  const [headerId, setHeaderId] = useState<number | null>(null);
 
   // ================= STATE TABEL =================
   const [items, setItems] = useState<Item[]>([]);
@@ -26,11 +27,31 @@ export default function InputBarang() {
   const [formItem, setFormItem] = useState<Item>({
     noMaterial: "",
     namaMaterial: "",
-    valuationType: "",
+    nomerKode7: "",
     satuan: "",
     jumlah: 0,
     hargaSatuan: 0,
   });
+
+  // ================= STATE SUGGESTIONS =================
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const fetchSuggestions = async (query: string) => {
+    if (!query) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost/gudang-api/get_master_material.php?q=${query}`);
+      const data = await res.json();
+      setSuggestions(data);
+    } catch (err) {
+      console.error("Error fetching suggestions:", err);
+    }
+  };
+
 
   return (
     <div className="p-4 md:p-6 max-w-full text-sm md:text-base animate-fade-in">
@@ -129,6 +150,7 @@ export default function InputBarang() {
                   const data = await res.json();
 
                   if (res.ok) {
+                    setHeaderId(data.id);
                     setShowDetail(true);
                   } else {
                     alert("Gagal menyimpan header: " + data.message);
@@ -168,7 +190,7 @@ export default function InputBarang() {
                     <tr>
                       <th className="px-4 py-3 border-b border-slate-200">No Material</th>
                       <th className="px-4 py-3 border-b border-slate-200">Nama Material</th>
-                      <th className="px-4 py-3 border-b border-slate-200">Valuation</th>
+                      <th className="px-4 py-3 border-b border-slate-200">Nomer Kode 7</th>
                       <th className="px-4 py-3 border-b border-slate-200">Satuan</th>
                       <th className="px-4 py-3 border-b border-slate-200 text-right">Jumlah</th>
                       <th className="px-4 py-3 border-b border-slate-200 text-right">Harga</th>
@@ -191,7 +213,7 @@ export default function InputBarang() {
                         <tr key={index} className="hover:bg-slate-50 transition-colors text-sm text-slate-700">
                           <td className="px-4 py-3 border-r border-slate-50">{item.noMaterial}</td>
                           <td className="px-4 py-3 border-r border-slate-50">{item.namaMaterial}</td>
-                          <td className="px-4 py-3 border-r border-slate-50 text-center">{item.valuationType}</td>
+                          <td className="px-4 py-3 border-r border-slate-50 text-center">{item.nomerKode7}</td>
                           <td className="px-4 py-3 border-r border-slate-50 text-center">{item.satuan}</td>
                           <td className="px-4 py-3 border-r border-slate-50 text-right font-medium">{item.jumlah}</td>
                           <td className="px-4 py-3 border-r border-slate-50 text-right">{item.hargaSatuan.toLocaleString()}</td>
@@ -224,17 +246,45 @@ export default function InputBarang() {
 
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
+                <div className="space-y-1 relative">
                   <label className="text-xs font-semibold text-slate-500 uppercase">No Material</label>
                   <input
                     className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
                     placeholder="Contoh: MAT-001"
                     value={formItem.noMaterial}
-                    onChange={(e) =>
-                      setFormItem({ ...formItem, noMaterial: e.target.value })
-                    }
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormItem({ ...formItem, noMaterial: val });
+                      fetchSuggestions(val);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    // Delay blur to allow click on suggestion
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   />
+                  {showSuggestions && suggestions.length > 0 && (
+                    <ul className="absolute z-10 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
+                      {suggestions.map((item, idx) => (
+                        <li
+                          key={idx}
+                          className="px-4 py-2 hover:bg-slate-100 cursor-pointer text-sm text-slate-700"
+                          onClick={() => {
+                            setFormItem({
+                              ...formItem,
+                              noMaterial: item.nomer_material,
+                              namaMaterial: item.nama_material,
+                              satuan: item.satuan,
+                            });
+                            setShowSuggestions(false);
+                          }}
+                        >
+                          <span className="font-bold">{item.nomer_material}</span> - {item.nama_material}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
+
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-500 uppercase">Nama Material</label>
@@ -249,15 +299,15 @@ export default function InputBarang() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500 uppercase">Valuation Type</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase">Nomer Kode 7</label>
                   <input
                     className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
                     placeholder="Contoh: STD"
-                    value={formItem.valuationType}
+                    value={formItem.nomerKode7}
                     onChange={(e) =>
                       setFormItem({
                         ...formItem,
-                        valuationType: e.target.value,
+                        nomerKode7: e.target.value,
                       })
                     }
                   />
@@ -325,17 +375,47 @@ export default function InputBarang() {
               </button>
 
               <button
-                onClick={() => {
-                  setItems([...items, formItem]);
-                  setFormItem({
-                    noMaterial: "",
-                    namaMaterial: "",
-                    valuationType: "",
-                    satuan: "",
-                    jumlah: 0,
-                    hargaSatuan: 0,
-                  });
-                  setShowModal(false);
+                onClick={async () => {
+                  if (!headerId) {
+                    alert("Header belum tersimpan. Silakan simpan header terlebih dahulu.");
+                    return;
+                  }
+
+                  try {
+                    const res = await fetch("http://localhost/gudang-api/insert_barang_detail.php", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        id_barang: headerId,
+                        nomor_kode_7: formItem.nomerKode7,
+                        nomor_material: formItem.noMaterial,
+                        jumlah: formItem.jumlah,
+                        harga_satuan: formItem.hargaSatuan,
+                        jenis_transaksi: jenisTransaksi,
+                      }),
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                      setItems([...items, formItem]);
+                      setFormItem({
+                        noMaterial: "",
+                        namaMaterial: "",
+                        nomerKode7: "",
+                        satuan: "",
+                        jumlah: 0,
+                        hargaSatuan: 0,
+                      });
+                      setShowModal(false);
+                      alert("Item berhasil disimpan ke database.");
+                    } else {
+                      alert("Gagal menyimpan item: " + data.message);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    alert("Terjadi kesalahan saat menyimpan item.");
+                  }
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-sm font-medium"
               >
