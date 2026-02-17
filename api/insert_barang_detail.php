@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -63,14 +63,28 @@ try {
         $mutasi_keluar = $jumlah;
     }
 
-    // 4. Defaults and Calculations
+    // 4. Fetch Persediaan Awal from tbl_master_material
+    $stmtStok = $conn->prepare("SELECT stok FROM tbl_master_material WHERE nomer_material = ?");
+    $stmtStok->execute([$nomor_material]);
+    $rowStok = $stmtStok->fetch(PDO::FETCH_ASSOC);
+    $persediaan_awal = $rowStok ? (float)$rowStok['stok'] : 0;
+
+    // 5. Defaults and Calculations
     $persediaan_karantina = 0;
-    $persediaan_awal = 0;
-    $persediaan_akhir = 0;
+    //$persediaan_awal = 0;
+    $persediaan_akhir = $persediaan_awal + $mutasi_masuk - $mutasi_keluar;
     $mata_uang = "Rupiah";
     $total_harga = $jumlah * $harga_satuan;
+    if ($persediaan_akhir < 0) {
+        http_response_code(400);
+        echo json_encode([
+            "message" => "Persediaan akhir tidak boleh minus. Stok saat ini: " . $persediaan_awal,
+            "error" => true
+        ]);
+        exit;
+    }
 
-    // 5. Insert
+    // 6. Insert
     $query = "INSERT INTO tbl_barang_details (
                 id_detail, 
                 id_barang, 
@@ -122,6 +136,12 @@ try {
     $stmt->bindParam(":tanggal_pergerakan", $tanggal_input);
 
     if ($stmt->execute()) {
+        // Update stok in tbl_master_material
+        $updateStokQuery = "UPDATE tbl_master_material SET stok = :persediaan_akhir WHERE nomer_material = :nomor_material";
+        $stmtUpdate = $conn->prepare($updateStokQuery);
+        $stmtUpdate->bindParam(":persediaan_akhir", $persediaan_akhir);
+        $stmtUpdate->bindParam(":nomor_material", $nomor_material);
+        $stmtUpdate->execute();
         echo json_encode(["message" => "Item detail successfully saved.", "id_detail" => $id_detail]);
     }
     else {
