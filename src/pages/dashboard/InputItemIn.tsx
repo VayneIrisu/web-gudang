@@ -11,9 +11,14 @@ type Item = {
 
 export default function InputBarang() {
   // ================= STATE FORM ATAS =================
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
+
   const [noSlip, setNoSlip] = useState("");
   const [tipePergerakan, setTipePergerakan] = useState("");
-  const [jenisTransaksi, setJenisTransaksi] = useState("");
+  const [jenisTransaksi, setJenisTransaksi] = useState(
+    user?.akses?.inputMasuk === false ? "Pengeluaran" : ""
+  );
   const [noKode, setNoKode] = useState("");
 
   const [showDetail, setShowDetail] = useState(false);
@@ -83,9 +88,10 @@ export default function InputBarang() {
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500 uppercase">Jenis Transaksi</label>
               <select
-                className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm md:text-base bg-white"
+                className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm md:text-base bg-white disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
                 value={jenisTransaksi}
                 onChange={(e) => setJenisTransaksi(e.target.value)}
+                disabled={user?.akses?.inputMasuk === false}
               >
                 <option value="">Pilih Jenis</option>
                 <option value="Penerimaan">Penerimaan</option>
@@ -124,9 +130,7 @@ export default function InputBarang() {
                   return;
                 }
 
-                // Ambil user dari localStorage
-                const userStr = localStorage.getItem("user");
-                const user = userStr ? JSON.parse(userStr) : null;
+                // Ambil petugas dari user
                 const petugasId = user?.id;
 
                 if (!petugasId) {
@@ -143,7 +147,7 @@ export default function InputBarang() {
                       tipePergerakan,
                       jenisTransaksi,
                       valuationType: noKode,
-                      petugas: petugasId
+                      petugas: user?.nama || user?.username || "Unknown"
                     })
                   });
 

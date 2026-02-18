@@ -53,6 +53,7 @@ if ($user["password"] !== $password) {
 $payload = [
   "id" => $user["id"],
   "username" => $user["username"],
+  "nama" => $user["nama"] ?? $user["username"], // Fallback to username if nama is empty
   "akses" => [
     "inputMasuk" => (bool)$user["input_barang_masuk"],
     "inputKeluar" => (bool)$user["input_barang_keluar"]

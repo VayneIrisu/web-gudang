@@ -8,5 +8,5 @@ export const dashboardMenu: DashboardMenuItem[] = [
   { label: "Dashboard", path: "/dashboard", end: true },
   { label: "Input Barang", path: "/dashboard/InputItemIn" },
   { label: "Cek Stok", path: "/dashboard/stok" },
-  { label: "Mutasi Barang", path: "/dashboard/kartu-stok" },
+  { label: "Mutasi Barang", path: "/dashboard/mutasi-barang" },
 ]

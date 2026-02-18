@@ -11,6 +11,7 @@ import DashboardHome from "./pages/dashboard/DashboardHome"
 import InputItemIn from "./pages/dashboard/InputItemIn"
 import InputItemOut from "./pages/dashboard/InputItemOut"
 import Stok from "./pages/dashboard/Stock"
+import MutasiBarang from "./pages/dashboard/MutasiBarang"
 import KartuGantung from "./pages/dashboard/KartuGantung"
 import PergerakanStock from "./pages/dashboard/PergerakanStock"
 import PengaturanAkses from "./pages/dashboard/PengaturanAkses"
@@ -28,20 +29,21 @@ function App() {
       </Route>
 
       {/* Dashboard */}
-      
+
       <Route path="/dashboard" element={
         <ProtectedRoute>
-        <DashboardLayout />
+          <DashboardLayout />
         </ProtectedRoute>
-        }>
+      }>
         <Route index element={
           <ProtectedRoute>
-          <DashboardHome />
+            <DashboardHome />
           </ProtectedRoute>
-          } />
+        } />
         <Route path="InputItemIn" element={<InputItemIn />} />
         <Route path="InputItemOut" element={<InputItemOut />} />
         <Route path="stok" element={<Stok />} />
+        <Route path="mutasi-barang" element={<MutasiBarang />} />
         <Route path="kartu-stok" element={<KartuGantung />} />
         <Route path="laporan" element={<PergerakanStock />} />
         <Route path="pengaturan" element={<PengaturanAkses />} />
@@ -50,7 +52,7 @@ function App() {
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
-    
+
   )
 }
 
