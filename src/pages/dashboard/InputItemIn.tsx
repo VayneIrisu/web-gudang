@@ -50,7 +50,7 @@ export default function InputBarang() {
 
     try {
       // const res = await fetch(`http://localhost/gudang-api/get_master_material.php?q=${query}`);
-      const res = await fetch(`https://web-gudang.42web.io/api/get_master_material.php?q=${query}`);
+      const res = await fetch(`https://web-gudang-api-production.up.railway.app/api/get_master_material.php?q=${query}`);
       const data = await res.json();
       setSuggestions(data);
     } catch (err) {
@@ -141,7 +141,7 @@ export default function InputBarang() {
 
                 try {
                   // const res = await fetch("http://localhost/gudang-api/insert_barang.php", {
-                  const res = await fetch("https://web-gudang.42web.io/api/insert_barang.php", {
+                  const res = await fetch("https://web-gudang-api-production.up.railway.app/api/insert_barang.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -389,7 +389,7 @@ export default function InputBarang() {
 
                   try {
                     // const res = await fetch("http://localhost/gudang-api/insert_barang_detail.php", {
-                    const res = await fetch("https://web-gudang.42web.io/api/insert_barang_detail.php", {
+                    const res = await fetch("https://web-gudang-api-production.up.railway.app/api/insert_barang_detail.php", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({

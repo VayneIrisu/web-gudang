@@ -23,7 +23,7 @@ export default function Login() {
     try {
       const res = await fetch(
         // "http://localhost/gudang-api/login.php", //local
-        "https://web-gudang.42web.io/api/login.php",
+        "https://web-gudang-api-production.up.railway.app/api/login.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
