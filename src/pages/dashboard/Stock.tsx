@@ -28,7 +28,8 @@ export default function CekStok() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost/gudang-api/get_stock.php");
+        // const response = await fetch("http://localhost/gudang-api/get_stock.php");
+        const response = await fetch("https://web-gudang.42web.io/api/get_stock.php");
 
         if (!response.ok) {
           throw new Error("Failed to fetch data");
