@@ -99,8 +99,8 @@ export default function MutasiBarang() {
             .includes(filterNama.toLowerCase());
 
         const cocokTanggal =
-            (!tanggalAwal || item.tanggalPergerakan >= tanggalAwal) &&
-            (!tanggalAkhir || item.tanggalPergerakan <= tanggalAkhir);
+            (!tanggalAwal || item.tanggalPergerakan >= tanggalAwal + " 00:00:00") &&
+            (!tanggalAkhir || item.tanggalPergerakan <= tanggalAkhir + " 23:59:59");
 
         return cocokMaterial && cocokNama && cocokTanggal;
     });
