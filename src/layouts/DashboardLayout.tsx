@@ -10,7 +10,7 @@ function DashboardLayout() {
 
   // Ambil user dari localStorage
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userName = user.nama || user.username || "Admin";
+  const userName = user.name || "Admin";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
