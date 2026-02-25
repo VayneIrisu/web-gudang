@@ -3,10 +3,8 @@ import { useState } from "react";
 type Item = {
   noMaterial: string;
   namaMaterial: string;
-  nomerKode7: string;
   satuan: string;
   jumlah: number;
-  hargaSatuan: number;
 };
 
 export default function InputBarang() {
@@ -15,11 +13,10 @@ export default function InputBarang() {
   const user = userStr ? JSON.parse(userStr) : null;
 
   const [noSlip, setNoSlip] = useState("");
-  const [tipePergerakan, setTipePergerakan] = useState("");
   const [jenisTransaksi, setJenisTransaksi] = useState(
     user?.akses?.inputMasuk === false ? "Pengeluaran" : ""
   );
-  const [noKode, setNoKode] = useState("");
+  const [keterangan, setKeterangan] = useState("");
 
   const [showDetail, setShowDetail] = useState(false);
   const [headerId, setHeaderId] = useState<number | null>(null);
@@ -32,10 +29,8 @@ export default function InputBarang() {
   const [formItem, setFormItem] = useState<Item>({
     noMaterial: "",
     namaMaterial: "",
-    nomerKode7: "",
     satuan: "",
     jumlah: 0,
-    hargaSatuan: 0,
   });
 
   // ================= STATE SUGGESTIONS =================
@@ -49,7 +44,6 @@ export default function InputBarang() {
     }
 
     try {
-      // const res = await fetch(`http://localhost/gudang-api/get_master_material.php?q=${query}`);
       const res = await fetch(`https://web-gudang-api-production.up.railway.app/api/get_master_material.php?q=${query}`);
       const data = await res.json();
       setSuggestions(data);
@@ -100,24 +94,13 @@ export default function InputBarang() {
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase">Tipe Pergerakan</label>
-              <input
-                type="number"
-                className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm md:text-base"
-                placeholder="Contoh: 101"
-                value={tipePergerakan}
-                onChange={(e) => setTipePergerakan(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase">Valuation Type</label>
+            <div className="space-y-1 md:col-span-2">
+              <label className="text-xs font-semibold text-slate-500 uppercase">Keterangan</label>
               <input
                 className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm md:text-base"
-                placeholder="Contoh: STD"
-                value={noKode}
-                onChange={(e) => setNoKode(e.target.value)}
+                placeholder="Masukkan Keterangan"
+                value={keterangan}
+                onChange={(e) => setKeterangan(e.target.value)}
               />
             </div>
           </div>
@@ -126,8 +109,8 @@ export default function InputBarang() {
             <button
               onClick={async () => {
                 // Validasi sederhana
-                if (!noSlip || !tipePergerakan || !jenisTransaksi || !noKode) {
-                  alert("Mohon lengkapi semua data header (No Slip, Jenis Transaksi, Tipe Pergerakan, Valuation Type)");
+                if (!noSlip || !jenisTransaksi || !keterangan) {
+                  alert("Mohon lengkapi semua data header (No Slip, Jenis Transaksi, Keterangan)");
                   return;
                 }
 
@@ -140,16 +123,14 @@ export default function InputBarang() {
                 }
 
                 try {
-                  // const res = await fetch("http://localhost/gudang-api/insert_barang.php", {
                   const res = await fetch("https://web-gudang-api-production.up.railway.app/api/insert_barang.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                       noSlip,
-                      tipePergerakan,
                       jenisTransaksi,
-                      valuationType: noKode,
-                      petugas: user?.nama || user?.username || "Unknown"
+                      keterangan,
+                      petugas: user?.name || user?.username || "Unknown"
                     })
                   });
 
@@ -196,11 +177,8 @@ export default function InputBarang() {
                     <tr>
                       <th className="px-4 py-3 border-b border-slate-200">No Material</th>
                       <th className="px-4 py-3 border-b border-slate-200">Nama Material</th>
-                      <th className="px-4 py-3 border-b border-slate-200">Nomer Kode 7</th>
                       <th className="px-4 py-3 border-b border-slate-200">Satuan</th>
                       <th className="px-4 py-3 border-b border-slate-200 text-right">Jumlah</th>
-                      <th className="px-4 py-3 border-b border-slate-200 text-right">Harga</th>
-                      <th className="px-4 py-3 border-b border-slate-200 text-right">Total</th>
                     </tr>
                   </thead>
 
@@ -208,7 +186,7 @@ export default function InputBarang() {
                     {items.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={4}
                           className="text-center py-8 text-slate-400"
                         >
                           <p>Belum ada item ditambahkan</p>
@@ -219,13 +197,8 @@ export default function InputBarang() {
                         <tr key={index} className="hover:bg-slate-50 transition-colors text-sm text-slate-700">
                           <td className="px-4 py-3 border-r border-slate-50">{item.noMaterial}</td>
                           <td className="px-4 py-3 border-r border-slate-50">{item.namaMaterial}</td>
-                          <td className="px-4 py-3 border-r border-slate-50 text-center">{item.nomerKode7}</td>
                           <td className="px-4 py-3 border-r border-slate-50 text-center">{item.satuan}</td>
                           <td className="px-4 py-3 border-r border-slate-50 text-right font-medium">{item.jumlah}</td>
-                          <td className="px-4 py-3 border-r border-slate-50 text-right">{item.hargaSatuan.toLocaleString()}</td>
-                          <td className="px-4 py-3 text-right font-bold text-slate-800">
-                            {(item.jumlah * item.hargaSatuan).toLocaleString()}
-                          </td>
                         </tr>
                       ))
                     )}
@@ -305,21 +278,6 @@ export default function InputBarang() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500 uppercase">Nomer Kode 7</label>
-                  <input
-                    className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                    placeholder="Contoh: STD"
-                    value={formItem.nomerKode7}
-                    onChange={(e) =>
-                      setFormItem({
-                        ...formItem,
-                        nomerKode7: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-500 uppercase">Satuan</label>
                   <input
                     className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
@@ -346,29 +304,6 @@ export default function InputBarang() {
                     }
                   />
                 </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500 uppercase">Harga Satuan</label>
-                  <input
-                    type="number"
-                    className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                    placeholder="0"
-                    value={formItem.hargaSatuan}
-                    onChange={(e) =>
-                      setFormItem({
-                        ...formItem,
-                        hargaSatuan: Number(e.target.value),
-                      })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 bg-slate-50 p-4 rounded-lg flex justify-between items-center border border-slate-100">
-                <span className="text-slate-600 font-medium">Total Harga Item Ini</span>
-                <span className="text-lg font-bold text-slate-800">
-                  Rp {(formItem.jumlah * formItem.hargaSatuan).toLocaleString()}
-                </span>
               </div>
             </div>
 
@@ -388,16 +323,13 @@ export default function InputBarang() {
                   }
 
                   try {
-                    // const res = await fetch("http://localhost/gudang-api/insert_barang_detail.php", {
                     const res = await fetch("https://web-gudang-api-production.up.railway.app/api/insert_barang_detail.php", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
                         id_barang: headerId,
-                        nomor_kode_7: formItem.nomerKode7,
                         nomor_material: formItem.noMaterial,
                         jumlah: formItem.jumlah,
-                        harga_satuan: formItem.hargaSatuan,
                         jenis_transaksi: jenisTransaksi,
                       }),
                     });
@@ -409,10 +341,8 @@ export default function InputBarang() {
                       setFormItem({
                         noMaterial: "",
                         namaMaterial: "",
-                        nomerKode7: "",
                         satuan: "",
                         jumlah: 0,
-                        hargaSatuan: 0,
                       });
                       setShowModal(false);
                       alert("Item berhasil disimpan ke database.");

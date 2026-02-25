@@ -6,20 +6,13 @@ type MutasiBarang = {
     nomorMaterial: string;
     namaMaterial: string;
     satuan: string;
-    valuationType: string;
     tanggalPergerakan: string;
-    tipePergerakan: string;
     noSlip: string;
-    mataUang: string;
-    kode7: string;
     petugas: string;
-    karantina: number;
     awal: number;
     masuk: number;
     keluar: number;
     akhir: number;
-    harga: number;
-    total: number;
 };
 
 export default function MutasiBarang() {
@@ -43,7 +36,6 @@ export default function MutasiBarang() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                // const response = await fetch("http://localhost/gudang-api/get_mutasi_barang.php");
                 const response = await fetch("https://web-gudang-api-production.up.railway.app/api/get_mutasi_barang.php");
 
                 if (!response.ok) {
@@ -57,20 +49,13 @@ export default function MutasiBarang() {
                     nomorMaterial: item.nomor_material || "",
                     namaMaterial: item.nama_material || "",
                     satuan: item.satuan || "",
-                    valuationType: item.valuation_type || "",
                     tanggalPergerakan: item.tanggal_pergerakan || "",
-                    tipePergerakan: item.tipe_pergerakan || "",
                     noSlip: item.no_slip || "",
-                    mataUang: item.mata_uang || "",
-                    kode7: item.nomor_kode_7 || "",
                     petugas: item.petugas || "",
-                    karantina: parseFloat(item.persediaan_karantina) || 0,
                     awal: parseFloat(item.persediaan_awal) || 0,
                     masuk: parseFloat(item.mutasi_masuk) || 0,
                     keluar: parseFloat(item.mutasi_keluar) || 0,
                     akhir: parseFloat(item.persediaan_akhir) || 0,
-                    harga: parseFloat(item.harga_satuan) || 0,
-                    total: parseFloat(item.total_harga) || 0,
                 }));
 
                 setData(mappedData);
@@ -136,20 +121,13 @@ export default function MutasiBarang() {
             "No Material": item.nomorMaterial,
             "Nama Material": item.namaMaterial,
             "Satuan": item.satuan,
-            "Valuation": item.valuationType,
             "Tanggal": formatDate(item.tanggalPergerakan),
-            "Tipe": item.tipePergerakan,
             "No Slip": item.noSlip,
-            "Mata Uang": item.mataUang,
-            "Kode 7": item.kode7,
             "Petugas": item.petugas,
-            "Karantina": item.karantina,
             "Awal": item.awal,
             "Masuk": item.masuk,
             "Keluar": item.keluar,
-            "Akhir": item.akhir,
-            "Harga": item.harga,
-            "Total": item.total
+            "Akhir": item.akhir
         }));
         const ws = utils.json_to_sheet(wsData);
         utils.book_append_sheet(wb, ws, "Mutasi Barang");
@@ -233,20 +211,13 @@ export default function MutasiBarang() {
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">No Material</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">Nama Material</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">Satuan</th>
-                                <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">Valuation</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">Tanggal</th>
-                                <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">Tipe</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">No Slip</th>
-                                <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">Mata Uang</th>
-                                <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">Kode 7</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap">Petugas</th>
-                                <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap text-right">Karantina</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap text-right">Awal</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap text-right">Masuk</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap text-right">Keluar</th>
                                 <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap text-right">Akhir</th>
-                                <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap text-right">Harga</th>
-                                <th className="px-4 py-3 border-b border-slate-200 whitespace-nowrap text-right">Total</th>
                             </tr>
                         </thead>
 
@@ -254,7 +225,7 @@ export default function MutasiBarang() {
                             {loading ? (
                                 <tr>
                                     <td
-                                        colSpan={17}
+                                        colSpan={10}
                                         className="text-center py-12 text-slate-400"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -269,7 +240,7 @@ export default function MutasiBarang() {
                             ) : error ? (
                                 <tr>
                                     <td
-                                        colSpan={17}
+                                        colSpan={10}
                                         className="text-center py-12"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2 text-red-500">
@@ -285,7 +256,7 @@ export default function MutasiBarang() {
                             ) : filteredData.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={17}
+                                        colSpan={10}
                                         className="text-center py-12 text-slate-400"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -300,20 +271,13 @@ export default function MutasiBarang() {
                                         <td className="px-4 py-3 border-r border-slate-100 font-medium">{item.nomorMaterial}</td>
                                         <td className="px-4 py-3 border-r border-slate-100">{item.namaMaterial}</td>
                                         <td className="px-4 py-3 border-r border-slate-100 text-center">{item.satuan}</td>
-                                        <td className="px-4 py-3 border-r border-slate-100">{item.valuationType}</td>
                                         <td className="px-4 py-3 border-r border-slate-100">{formatDate(item.tanggalPergerakan)}</td>
-                                        <td className="px-4 py-3 border-r border-slate-100">{item.tipePergerakan}</td>
                                         <td className="px-4 py-3 border-r border-slate-100">{item.noSlip}</td>
-                                        <td className="px-4 py-3 border-r border-slate-100 text-center">{item.mataUang}</td>
-                                        <td className="px-4 py-3 border-r border-slate-100">{item.kode7}</td>
                                         <td className="px-4 py-3 border-r border-slate-100">{item.petugas}</td>
-                                        <td className="px-4 py-3 border-r border-slate-100 text-right">{formatNumber(item.karantina)}</td>
                                         <td className="px-4 py-3 border-r border-slate-100 text-right">{formatNumber(item.awal)}</td>
                                         <td className="px-4 py-3 border-r border-slate-100 text-right text-green-600 font-medium">{formatNumber(item.masuk)}</td>
                                         <td className="px-4 py-3 border-r border-slate-100 text-right text-red-600 font-medium">{formatNumber(item.keluar)}</td>
                                         <td className="px-4 py-3 border-r border-slate-100 text-right font-bold">{formatNumber(item.akhir)}</td>
-                                        <td className="px-4 py-3 border-r border-slate-100 text-right">{formatNumber(item.harga)}</td>
-                                        <td className="px-4 py-3 text-right font-bold text-blue-700 bg-blue-50/30">{formatNumber(item.total)}</td>
                                     </tr>
                                 ))
                             )}
