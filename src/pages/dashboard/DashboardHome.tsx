@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function DashboardHome() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userName = user.nama || user.username || "Admin";
+  const userName = user.name || user.username || "Admin";
 
   return (
     <div className="space-y-6 animate-fade-in">
