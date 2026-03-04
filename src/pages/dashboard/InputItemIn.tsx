@@ -295,7 +295,6 @@ export default function InputBarang() {
                     type="number"
                     className="w-full border border-slate-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
                     placeholder="0"
-                    value={formItem.jumlah}
                     onChange={(e) =>
                       setFormItem({
                         ...formItem,
