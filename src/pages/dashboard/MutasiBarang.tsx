@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { utils, writeFile } from "xlsx";
+import { apiGet } from "../../config/api";
 
 
 type MutasiBarang = {
@@ -33,43 +34,41 @@ export default function MutasiBarang() {
     const itemsPerPage = 10;
 
     // ================= FETCH DATA =================
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch("https://web-gudang-api-production.up.railway.app/api/get_mutasi_barang.php");
+    const fetchData = async (forceRefresh = false) => {
+        try {
+            setLoading(true);
+            const result = await apiGet<any>("get_mutasi_barang", undefined, { bypassCache: forceRefresh });
 
-                if (!response.ok) {
-                    throw new Error("Failed to fetch data");
-                }
-
-                const result = await response.json();
-
-                // Map database fields to component fields
-                const mappedData = result.map((item: any) => ({
-                    nomorMaterial: item.nomor_material || "",
-                    namaMaterial: item.nama_material || "",
-                    satuan: item.satuan || "",
-                    tanggalPergerakan: item.tanggal_pergerakan || "",
-                    noSlip: item.no_slip || "",
-                    keterangan: item.keterangan || "",
-                    petugas: item.petugas || "",
-                    awal: parseFloat(item.persediaan_awal) || 0,
-                    masuk: parseFloat(item.mutasi_masuk) || 0,
-                    keluar: parseFloat(item.mutasi_keluar) || 0,
-                    akhir: parseFloat(item.persediaan_akhir) || 0,
-                }));
-
-                setData(mappedData);
-                setError("");
-            } catch (err) {
-                setError("Gagal mengambil data. Silakan coba lagi.");
-                console.error("Error fetching mutasi barang data:", err);
-            } finally {
-                setLoading(false);
+            if (!Array.isArray(result)) {
+                throw new Error(result?.message || "Failed to fetch data");
             }
-        };
 
+            // Map database fields to component fields
+            const mappedData = result.map((item: any) => ({
+                nomorMaterial: item.nomor_material || "",
+                namaMaterial: item.nama_material || "",
+                satuan: item.satuan || "",
+                tanggalPergerakan: item.tanggal_pergerakan || "",
+                noSlip: item.no_slip || "",
+                keterangan: item.keterangan || "",
+                petugas: item.petugas || "",
+                awal: parseFloat(item.persediaan_awal) || 0,
+                masuk: parseFloat(item.mutasi_masuk) || 0,
+                keluar: parseFloat(item.mutasi_keluar) || 0,
+                akhir: parseFloat(item.persediaan_akhir) || 0,
+            }));
+
+            setData(mappedData);
+            setError("");
+        } catch (err: any) {
+            setError(err?.message || "Gagal mengambil data. Silakan coba lagi.");
+            console.error("Error fetching mutasi barang data:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, []);
 
@@ -152,13 +151,27 @@ export default function MutasiBarang() {
                         </p>
                     </div>
 
-                    <button
-                        onClick={handleExportExcel}
-                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm flex items-center justify-center gap-2 text-sm font-medium"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                        Unduh Data
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => fetchData(true)}
+                            disabled={loading}
+                            className="px-3.5 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-1.5 text-sm font-medium disabled:opacity-50"
+                            title="Segarkan data langsung dari Google Sheets"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={loading ? "animate-spin text-blue-600" : ""}>
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                            </svg>
+                            <span>{loading ? "Memuat..." : "Segarkan"}</span>
+                        </button>
+
+                        <button
+                            onClick={handleExportExcel}
+                            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm flex items-center justify-center gap-2 text-sm font-medium"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                            Unduh Data
+                        </button>
+                    </div>
                 </div>
 
                 {/* ================= FILTER ================= */}

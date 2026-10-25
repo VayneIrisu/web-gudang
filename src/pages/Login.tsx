@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiPost } from "../config/api";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -21,19 +22,9 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(
-        // "http://localhost/gudang-api/login.php", //local
-        "https://web-gudang-api-production.up.railway.app/api/login.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password })
-        }
-      );
+      const data = await apiPost("login", { username, password });
 
-      const data = await res.json();
-
-      if (!res.ok) {
+      if (!data.success) {
         setError(data.message || "Login gagal");
         setIsLoading(false);
         return;
@@ -43,8 +34,8 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       navigate("/dashboard");
-    } catch (err) {
-      setError("Terjadi kesalahan koneksi");
+    } catch (err: any) {
+      setError(err?.message || "Terjadi kesalahan koneksi");
       setIsLoading(false);
     }
   };

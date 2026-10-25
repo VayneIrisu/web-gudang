@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { apiGet, apiPost } from "../../config/api";
 
 type Item = {
   noMaterial: string;
@@ -36,20 +37,28 @@ export default function InputBarang() {
   // ================= STATE SUGGESTIONS =================
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceTimerRef = useRef<any>(null);
 
-  const fetchSuggestions = async (query: string) => {
-    if (!query) {
+  const fetchSuggestions = (query: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    if (!query || query.trim().length === 0) {
       setSuggestions([]);
       return;
     }
 
-    try {
-      const res = await fetch(`https://web-gudang-api-production.up.railway.app/api/get_master_material.php?q=${query}`);
-      const data = await res.json();
-      setSuggestions(data);
-    } catch (err) {
-      console.error("Error fetching suggestions:", err);
-    }
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        const data = await apiGet<any[]>("get_master_material", { q: query.trim() });
+        if (Array.isArray(data)) {
+          setSuggestions(data);
+        }
+      } catch (err) {
+        console.error("Error fetching suggestions:", err);
+      }
+    }, 250);
   };
 
 
@@ -123,28 +132,22 @@ export default function InputBarang() {
                 }
 
                 try {
-                  const res = await fetch("https://web-gudang-api-production.up.railway.app/api/insert_barang.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      noSlip,
-                      jenisTransaksi,
-                      keterangan,
-                      petugas: user?.name || user?.username || "Unknown"
-                    })
+                  const data = await apiPost("insert_barang", {
+                    noSlip,
+                    jenisTransaksi,
+                    keterangan,
+                    petugas: user?.name || user?.username || "Unknown"
                   });
 
-                  const data = await res.json();
-
-                  if (res.ok) {
+                  if (data.success) {
                     setHeaderId(data.id);
                     setShowDetail(true);
                   } else {
-                    alert("Gagal menyimpan header: " + data.message);
+                    alert("Gagal menyimpan header: " + (data.message || "Unknown error"));
                   }
-                } catch (err) {
+                } catch (err: any) {
                   console.error(err);
-                  alert("Terjadi kesalahan koneksi server");
+                  alert("Terjadi kesalahan koneksi server: " + (err?.message || ""));
                 }
               }}
               className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-sm font-medium flex items-center gap-2"
@@ -322,20 +325,14 @@ export default function InputBarang() {
                   }
 
                   try {
-                    const res = await fetch("https://web-gudang-api-production.up.railway.app/api/insert_barang_detail.php", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        id_barang: headerId,
-                        nomor_material: formItem.noMaterial,
-                        jumlah: formItem.jumlah,
-                        jenis_transaksi: jenisTransaksi,
-                      }),
+                    const data = await apiPost("insert_barang_detail", {
+                      id_barang: headerId,
+                      nomor_material: formItem.noMaterial,
+                      jumlah: formItem.jumlah,
+                      jenis_transaksi: jenisTransaksi,
                     });
 
-                    const data = await res.json();
-
-                    if (res.ok) {
+                    if (data.success) {
                       setItems([...items, formItem]);
                       setFormItem({
                         noMaterial: "",
@@ -346,11 +343,11 @@ export default function InputBarang() {
                       setShowModal(false);
                       alert("Item berhasil disimpan ke database.");
                     } else {
-                      alert("Gagal menyimpan item: " + data.message);
+                      alert("Gagal menyimpan item: " + (data.message || "Unknown error"));
                     }
-                  } catch (err) {
+                  } catch (err: any) {
                     console.error(err);
-                    alert("Terjadi kesalahan saat menyimpan item.");
+                    alert("Terjadi kesalahan saat menyimpan item: " + (err?.message || ""));
                   }
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-sm font-medium"
